@@ -16,7 +16,9 @@ class TranslateController < ActionController::Base
   end
   
   def translate
-    I18n.backend.store_translations(@to_locale, Translate::Keys.to_deep_hash(params[:key]))
+    storage_hash = Hash.new
+    params[:key].keys.each {|k| storage_hash[k] = params[:key][k] unless params[:key][k].blank?}
+    I18n.backend.store_translations(@to_locale, Translate::Keys.to_deep_hash(storage_hash))
     Translate::Storage.new(@to_locale).write_to_file
     Translate::Log.new(@from_locale, @to_locale, params[:key].keys).write_to_file
     force_init_translations # Force reload from YAML file
