@@ -100,7 +100,7 @@ class Translate::Keys
   end
 
   def i18n_lookup_pattern
-    /\b(?:I18n\.t|I18n\.translate|t)(?:\s|\():?('|")([()\[\]\?a-z0-9_]+.[()\[\]\?a-z0-9_.\s]+)\1\)?/
+    /(?:I18n\.t|I18n\.translate)(?:\s|\()('|")([a-zA-Z0-9_:\(\)\[\]\?\s\-\/\.]*)\1\)?/
   end
   
   def i18n_lookup_backreference_index
