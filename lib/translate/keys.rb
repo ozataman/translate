@@ -48,6 +48,24 @@ class Translate::Keys
       deep_hash
     end
   end
+  
+  def self.deep_delete!(hash, key)
+    key_path = key.split(".")
+    
+    parent_node = key_path.inject(hash) do |node, key|
+      if node[key].is_a?(Hash)
+        node[key]
+      else
+        node
+      end
+    end
+    
+    # delete the deep key
+    parent_node.delete(key_path.last)
+    
+    # return the modified hash
+    hash
+  end
 
   # deep_merge by Stefan Rusterholz, see http://www.ruby-forum.com/topic/142809
   def self.deep_merge!(hash1, hash2)
