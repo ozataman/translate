@@ -28,6 +28,17 @@ class TranslateController < ActionController::Base
     flash[:notice] = "Translations stored"
     redirect_to params.slice(:filter, :sort_by, :key_type, :key_pattern, :text_type, :text_pattern).merge({:action => :index})
   end
+  
+  def destroy
+    storage_hash = Translate::Keys.to_deep_hash({params[:key] => nil})
+    I18n.valid_locales.each do |locale|
+      I18n.backend.store_translations(locale, storage_hash)
+      Translate::Storage.new(locale).write_to_file
+    end
+    force_init_translations # Force reload from YAML file
+    flash[:notice] = "Translation key #{params[:key]} has been removed from translations tree."
+    redirect_to params.slice(:filter, :sort_by, :key_type, :key_pattern, :text_type, :text_pattern).merge({:action => :index})
+  end
 
   def reload
     Translate::Keys.files = nil
@@ -62,10 +73,16 @@ class TranslateController < ActionController::Base
         lookup(@to_locale, key).blank?
       when 'changed'
         old_from_text(key).blank? || lookup(@from_locale, key) == old_from_text(key)
+      when 'stale'
+        !stale_keys.include?(key)
       else
         raise "Unknown filter '#{params[:filter]}'"
       end
     end
+  end
+  
+  def stale_keys
+    @stale_keys ||= Translate::Keys.new.i18n_keys(@from_locale).uniq.compact - @files.keys.map(&:to_s).uniq.compact
   end
   
   def filter_by_key_pattern
