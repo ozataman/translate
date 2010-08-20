@@ -30,6 +30,6 @@ class Translate::File
   private
   def keys_to_yaml(keys)
     # Using ya2yaml, if available, for UTF8 support
-    keys.respond_to?(:ya2yaml) ? keys.ya2yaml(:escape_as_utf8 => true) : keys.to_yaml
+    keys.respond_to?(:ya2yaml) ? keys.ya2yaml(:escape_as_utf8 => true, :syck_compatible => true) : keys.to_yaml
   end    
 end
