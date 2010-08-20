@@ -30,10 +30,13 @@ class TranslateController < ActionController::Base
   end
   
   def destroy
-    storage_hash = Translate::Keys.to_deep_hash({params[:key] => nil})
+    I18n.backend.send(:init_translations) unless I18n.backend.initialized?
+    
     I18n.valid_locales.each do |locale|
-      I18n.backend.store_translations(locale, storage_hash)
-      Translate::Storage.new(locale).write_to_file
+      storage_hash = I18n.backend.send(:translations)[locale.to_sym]
+      Translate::Keys.deep_delete!(storage_hash, params[:key])
+      
+      Translate::Storage.new(locale, storage_hash).write_to_file
     end
     force_init_translations # Force reload from YAML file
     flash[:notice] = "Translation key #{params[:key]} has been removed from translations tree."
